@@ -17,12 +17,12 @@ img{display:block;max-width:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 h1,h2,h3,h4{font-family:Poppins,system-ui,sans-serif;font-weight:800;color:var(--ink);letter-spacing:-.025em;line-height:1.08;text-wrap:balance}
 h3{font-weight:700}
-mark{background:var(--yellow);color:var(--ink);padding:0 .22em;border-radius:.3em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+mark{white-space:nowrap;background:linear-gradient(transparent 22%,var(--yellow) 22%,var(--yellow) 94%,transparent 94%);color:var(--ink);padding:0 .16em;border-radius:.2em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .hw{font-family:Caveat,cursive;font-weight:700;color:var(--ink)}
 .wrap{max-width:1240px;margin:0 auto;padding:0 var(--gut)}
 .eyebrow{display:inline-flex;align-items:center;gap:10px;font:800 13px/1 Nunito;letter-spacing:.14em;text-transform:uppercase;color:var(--violet)}
 .eyebrow::before{content:"";width:22px;height:6px;border-radius:6px;background:var(--yellow)}
-.h2{font-size:clamp(34px,4.2vw,58px);margin:16px 0 16px}
+.h2{font-size:clamp(30px,4.2vw,58px);margin:16px 0 16px;line-height:1.2}
 .card{border-radius:28px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 24px;border-radius:999px;font:800 15.5px/1 Nunito;border:0;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s;white-space:nowrap}
 .btn:hover{transform:translateY(-2px)}
@@ -69,3 +69,5 @@ body.open .burger i::after{top:0;transform:rotate(-45deg)}
 .rv{opacity:0;transform:translateY(22px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
 .rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+
+mark.wrap-ok{white-space:normal}

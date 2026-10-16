@@ -16,7 +16,7 @@
 .hero{position:relative;padding:clamp(40px,6vw,80px) 0 clamp(50px,7vw,90px);overflow:hidden}
 .hero .g{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,4vw,60px);align-items:center}
 .hero h1{font-size:clamp(46px,6.6vw,96px);line-height:1;margin:20px 0 4px}
-.hero .sub{font:700 clamp(22px,2.4vw,34px)/1.2 Poppins;color:var(--ink);display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--lav);padding:8px 10px 8px 20px;border-radius:999px;margin-top:10px}
+.hero .sub{font:700 clamp(19px,2.1vw,32px)/1.2 Poppins;color:var(--ink);display:inline-flex;align-items:center;gap:12px;white-space:nowrap;background:var(--lav);padding:8px 10px 8px 20px;border-radius:999px;margin-top:10px}
 .hero .sub mark{background:var(--yellow);color:var(--ink);padding:6px 18px;border-radius:999px}
 .hero p.lead{font-size:clamp(17px,1.4vw,20px);max-width:560px;margin-top:26px}
 .hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
@@ -175,7 +175,8 @@
   .bens{grid-template-columns:1fr 1fr}
 }
 @media(max-width:600px){
-  .hero .sub{border-radius:24px;padding:12px 16px}
+  .hero .sub{display:block;white-space:normal;background:none;padding:0;font-size:26px;line-height:1.35}
+  .hero .sub mark{padding:2px 12px}
   .steps{grid-template-columns:1fr}
   .step:last-child{grid-column:auto}
   .step p{min-height:0}
@@ -254,7 +255,7 @@
   <div class="wrap story">
     <div class="sticky">
       <span class="eyebrow rv">Nuestra historia</span>
-      <h2 class="h2 rv">TESTEA no nació para inventar una plataforma.<br><mark>Nació de una dificultad.</mark></h2>
+      <h2 class="h2 rv">TESTEA no nació para inventar una plataforma.<br><mark class="wrap-ok">Nació de una dificultad.</mark></h2>
       <p class="rv">Una dificultad que nosotros mismos experimentamos como estudiantes de Marketing Digital, y que después volvimos a ver dentro de la industria.</p>
       <img class="rv" src="img/equipo-trabajando.jpg" alt="Estudiantes analizando métricas de una campaña" loading="lazy">
     </div>
