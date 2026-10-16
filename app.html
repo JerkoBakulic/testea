@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testea — Demo de la plataforma</title>
+<meta name="description" content="Prototipo interactivo de TESTEA: crea una campaña, interpreta sus KPI, formula una hipótesis y compara un test A/B.">
+<meta name="theme-color" content="#f7f5fc">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%235b3fd6'/%3E%3Ctext x='32' y='45' font-family='Arial Black,Arial' font-weight='900' font-size='38' text-anchor='middle' fill='white'%3ET%3C/text%3E%3Cpath d='M48 14l6-5M50 22h8M46 8l1-6' stroke='%23ffd84a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/testea.css">
+<style>
+body{background:var(--soft)}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(247,245,252,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar .wrap{max-width:1400px;display:flex;justify-content:space-between;align-items:center;height:70px;gap:14px}
+.topbar .logo span{font-size:28px}
+.demo-tag{padding:6px 12px;border-radius:999px;background:var(--yellowsoft);font:800 12px Nunito;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.topbar .r{display:flex;gap:10px;align-items:center}
+.credits{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#fff;box-shadow:var(--shadow-s);font-weight:800;color:var(--ink)}
+.credits i{font-style:normal;width:26px;height:26px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;font-size:13px}
+.credits.bump{animation:bump .5s}
+@keyframes bump{40%{transform:scale(1.12)}}
+
+.app{max-width:1400px;margin:0 auto;padding:24px var(--gut) 60px;display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:start}
+.side{position:sticky;top:94px;display:grid;gap:14px}
+.panel{background:#fff;border-radius:24px;padding:20px;box-shadow:var(--shadow-s)}
+.plan-chip{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.plan-chip b{font:700 18px Poppins;color:var(--ink)}
+.plan-chip span{padding:5px 12px;border-radius:999px;font:800 12px Nunito;background:var(--lav);color:var(--violet)}
+.stepper{list-style:none;display:grid;gap:4px}
+.stepper li{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:14px;font-weight:700;font-size:15px;color:var(--mute)}
+.stepper li i{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;font:800 12px Poppins;font-style:normal;background:var(--soft);color:var(--mute)}
+.stepper li.done{color:var(--ink)}
+.stepper li.done i{background:var(--mint);color:var(--mintd)}
+.stepper li.on{background:var(--lav);color:var(--violet)}
+.stepper li.on i{background:var(--violet);color:#fff}
+.hist h4{font-size:16px;margin-bottom:10px}
+.hist ul{list-style:none;display:grid;gap:8px;max-height:260px;overflow:auto}
+.hist li{padding:10px 12px;border-radius:14px;background:var(--soft);font-size:13.5px}
+.hist li b{display:block;color:var(--ink)}
+.hist .empty{font-size:14px;color:var(--mute)}
+
+.main{min-width:0}
+.view{display:none;animation:fade .4s var(--ease)}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}}
+.vh{margin-bottom:22px}
+.vh .k{font:800 13px Nunito;letter-spacing:.14em;text-transform:uppercase;color:var(--violet)}
+.vh h1{font-size:clamp(28px,3.2vw,42px);margin:8px 0 10px}
+.vh p{max-width:720px}
+.box{background:#fff;border-radius:26px;padding:clamp(20px,3vw,30px);box-shadow:var(--shadow-s);margin-bottom:16px}
+.actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px}
+.err{display:none;margin-top:12px;padding:12px 16px;border-radius:14px;background:var(--pink);color:#a02848;font-weight:700}
+.err.on{display:block}
+.note{padding:14px 18px;border-radius:16px;background:var(--yellowsoft);font-size:15px;color:var(--ink)}
+.note b{font-weight:800}
+
+/* selección de tarjetas */
+.choices{display:grid;gap:14px}
+.choices.c3{grid-template-columns:repeat(3,1fr)}
+.choices.c4{grid-template-columns:repeat(4,1fr)}
+.choice{position:relative;text-align:left;border:2px solid var(--line);background:#fff;border-radius:22px;padding:20px;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;display:flex;flex-direction:column;gap:6px}
+.choice:hover{border-color:var(--violet2);transform:translateY(-3px)}
+.choice.sel{border-color:var(--violet);box-shadow:0 0 0 4px var(--lav)}
+.choice.sel::after{content:"✓";position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;background:var(--violet);color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px}
+.choice.lock{opacity:.55;cursor:not-allowed}
+.choice .em{font-size:32px}
+.choice b{font:700 19px Poppins;color:var(--ink)}
+.choice small{font:800 12px Nunito;letter-spacing:.08em;text-transform:uppercase;color:var(--violet)}
+.choice span{font-size:14.5px}
+.choice .cr{font:800 30px Poppins;color:var(--ink);margin-top:6px}
+.choice .cr em{font:700 14px Nunito;font-style:normal;color:var(--mute)}
+
+/* formularios */
+.fg{display:grid;gap:14px}
+.fg.two{grid-template-columns:1fr 1fr}
+label.f{display:grid;gap:6px;font-weight:800;font-size:14px;color:var(--ink)}
+label.f small{font-weight:600;color:var(--mute)}
+.f input,.f select,.f textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;font-weight:600;outline:none;transition:border-color .2s}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--violet)}
+.f textarea{min-height:92px;resize:vertical}
+.f.locked input,.f.locked select,.f.locked textarea{background:var(--soft);color:var(--mute)}
+.f .lk{font-weight:700;font-size:12px;color:var(--mute)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{padding:10px 16px;border-radius:999px;border:2px solid var(--line);background:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:.2s}
+.seg button.on{background:var(--violet);border-color:var(--violet);color:#fff}
+.seg button:disabled{opacity:.5;cursor:not-allowed}
+
+/* brief */
+.brief{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.brief div{background:var(--soft);border-radius:18px;padding:14px 16px}
+.brief dt{font:800 11px Nunito;letter-spacing:.12em;text-transform:uppercase;color:var(--violet)}
+.brief dd{font-weight:700;color:var(--ink);margin-top:4px;font-size:15px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{border:2px solid var(--line);border-radius:16px;padding:12px 14px;cursor:pointer;background:#fff;text-align:left;transition:.2s}
+.kpi:hover{border-color:var(--violet2)}
+.kpi b{display:block;color:var(--ink);font-weight:800}
+.kpi span{font-size:13px;color:var(--mute)}
+.kpi.sel{border-color:var(--violet);background:var(--lav)}
+.kpi.good{border-color:var(--mintd);background:var(--mint)}
+.kpi.ctx{border-color:#e5c04a;background:var(--yellowsoft)}
+.kpi.bad{border-color:var(--coral);background:var(--pink)}
+.kpi .v{display:none;margin-top:6px;font:800 11px Nunito;letter-spacing:.06em;text-transform:uppercase}
+.kpi.good .v,.kpi.ctx .v,.kpi.bad .v{display:block}
+.kpi.good .v{color:var(--mintd)}.kpi.ctx .v{color:#a07d00}.kpi.bad .v{color:var(--coral)}
+.counter{font-weight:800;color:var(--violet)}
+
+/* anuncio */
+.adgrid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.post{background:#fff;border-radius:22px;box-shadow:var(--shadow);overflow:hidden;font-size:14px}
+.post .hd{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.post .hd i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;background:var(--lav);font-size:18px}
+.post .hd b{display:block;color:var(--ink)}
+.post .hd small{color:var(--mute);font-size:12px}
+.post .img{aspect-ratio:1;display:grid;place-items:center;font-size:84px;color:#fff;text-align:center;position:relative}
+.post .img span{position:absolute;left:14px;right:14px;bottom:14px;font:800 18px/1.15 Poppins;text-shadow:0 2px 10px rgba(0,0,0,.25)}
+.post .cta{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--soft);font-weight:800;color:var(--ink)}
+.post .cta em{font-style:normal;padding:8px 14px;border-radius:10px;background:var(--violet);color:#fff;font-size:13px}
+.post .tx{padding:12px 14px 16px;color:var(--text)}
+.post .tx b{color:var(--ink)}
+.ab{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ab .post{box-shadow:var(--shadow-s)}
+.ab h3{display:flex;align-items:center;gap:10px;font-size:18px;margin-bottom:10px}
+.ab h3 i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-style:normal;color:#fff;background:var(--coral)}
+.ab .b h3 i{background:var(--mintd)}
+
+/* publicación */
+.launch{text-align:center;padding:50px 20px}
+.launch .plane{font-size:64px;color:var(--violet);animation:fly 1.6s ease-in-out infinite}
+@keyframes fly{50%{transform:translate(10px,-8px) rotate(-6deg)}}
+.launch .bar{height:12px;border-radius:12px;background:var(--lav);max-width:420px;margin:22px auto 10px;overflow:hidden}
+.launch .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--violet2));border-radius:12px;transition:width .35s}
+.launch p{font-weight:800;color:var(--ink)}
+.launch small{color:var(--mute)}
+
+/* resultados */
+.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.met{border-radius:18px;padding:14px 16px;background:var(--soft);position:relative}
+.met span{font:800 11px Nunito;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.met strong{display:block;font:700 26px Poppins;color:var(--ink);margin-top:4px}
+.met em{position:absolute;top:12px;right:12px;font-style:normal;font:800 10px Nunito;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+.met.useful{background:var(--mint)}.met.useful em{background:var(--mintd);color:#fff}
+.met.vanity{background:var(--pink)}.met.vanity em{background:var(--coral);color:#fff}
+.met.context em{background:var(--yellow);color:var(--ink)}
+.read{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;padding:20px;border-radius:20px;background:var(--lav);margin-top:16px}
+.read .ic{width:46px;height:46px;border-radius:14px;background:var(--violet);color:#fff;display:grid;place-items:center;font-size:22px}
+.read h4{font-size:18px;margin-bottom:6px}
+.read ul{margin:8px 0 0 18px;display:grid;gap:4px}
+.funnel{display:grid;gap:8px;margin-top:16px}
+.funnel div{display:grid;grid-template-columns:120px 1fr 90px;gap:12px;align-items:center;font-weight:800;color:var(--ink);font-size:14px}
+.funnel .t{height:14px;border-radius:14px;background:var(--soft);overflow:hidden}
+.funnel .t i{display:block;height:100%;border-radius:14px;background:var(--violet2);transition:width .8s var(--ease)}
+.funnel div:nth-child(2) .t i{background:var(--coral)}
+.funnel div:nth-child(3) .t i{background:var(--mintd)}
+
+/* hipótesis */
+.hyp{font:700 19px/1.5 Poppins;color:var(--ink);background:var(--yellowsoft);border-radius:18px;padding:18px 20px;margin-top:14px}
+.hyp em{font-style:normal;background:#fff;border-radius:8px;padding:2px 8px}
+
+/* comparación */
+.cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cmp .c{background:var(--soft);border-radius:18px;padding:16px}
+.cmp .c span{font:800 11px Nunito;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.cmp .row{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;margin-top:10px;font-weight:800;color:var(--ink)}
+.cmp .row i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px}
+.cmp .row .ta{background:var(--coral)}.cmp .row .tb{background:var(--mintd)}
+.cmp .track{height:10px;border-radius:10px;background:#fff;overflow:hidden}
+.cmp .track b{display:block;height:100%;border-radius:10px;transition:width .8s var(--ease)}
+.cmp .delta{display:inline-block;margin-top:10px;padding:4px 10px;border-radius:999px;font:800 12px Nunito}
+.delta.up{background:var(--mint);color:var(--mintd)}.delta.down{background:var(--pink);color:var(--coral)}
+.verdict{display:flex;gap:16px;align-items:center;padding:20px;border-radius:20px;margin-top:16px}
+.verdict.win{background:var(--mint)}.verdict.lose{background:var(--pink)}.verdict.tie{background:var(--yellowsoft)}
+.verdict .big{font-size:40px}
+.verdict h4{font-size:20px}
+.trivia{margin-top:16px}
+.trivia h4{font-size:18px;margin-bottom:12px}
+.trivia .opts{display:grid;gap:8px}
+.trivia button{text-align:left;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:700;cursor:pointer;transition:.2s}
+.trivia button:hover:not(:disabled){border-color:var(--violet2)}
+.trivia button.ok{border-color:var(--mintd);background:var(--mint)}
+.trivia button.no{border-color:var(--coral);background:var(--pink)}
+.trivia .fb{display:none;margin-top:10px;padding:12px 16px;border-radius:14px;background:var(--lav);font-weight:700;color:var(--ink)}
+.trivia .fb.on{display:block}
+
+/* aprendizaje */
+.report{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.report div{background:var(--soft);border-radius:18px;padding:16px}
+.report dt{font:800 11px Nunito;letter-spacing:.12em;text-transform:uppercase;color:var(--violet)}
+.report dd{font-weight:700;color:var(--ink);margin-top:4px}
+.done-msg{display:none;margin-top:16px;padding:18px 20px;border-radius:18px;background:var(--mint);font-weight:800;color:var(--ink)}
+.done-msg.on{display:block}
+.approval{display:none;align-items:center;gap:12px;margin-top:14px;padding:14px 16px;border-radius:16px;background:var(--lav);font-weight:800;color:var(--ink)}
+.approval.on{display:flex}
+.approval .sp{width:22px;height:22px;border-radius:50%;border:3px solid var(--violet2);border-top-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:1060px){
+  .app{grid-template-columns:1fr}
+  .side{position:static;grid-template-columns:1fr 1fr}
+  .stepper{grid-template-columns:repeat(3,1fr)}
+  .adgrid{grid-template-columns:1fr}
+  .adgrid .post{max-width:360px}
+}
+@media(max-width:760px){
+  .topbar .demo-tag{display:none}
+  .side{grid-template-columns:1fr}
+  .stepper{grid-template-columns:repeat(9,1fr);gap:4px}
+  .stepper li{padding:4px;justify-content:center}
+  .stepper li span{display:none}
+  .hist{display:none}
+  .choices.c3,.choices.c4,.brief,.kpis,.mets,.cmp,.ab,.report,.fg.two{grid-template-columns:1fr 1fr}
+  .funnel div{grid-template-columns:90px 1fr 70px}
+}
+@media(max-width:520px){
+  .choices.c3,.choices.c4,.brief,.mets,.cmp,.ab,.report,.fg.two{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr}
+  .actions .btn{flex:1}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a href="index.html" class="logo" aria-label="Volver al sitio de Testea"><span>Testea</span><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 18 30 6M10 26h24M8 34l20 2" stroke="#ffd84a" stroke-width="5" stroke-linecap="round"/></svg></a>
+    <span class="demo-tag">Prototipo · resultados simulados</span>
+    <div class="r">
+      <div class="credits" id="credits" title="Créditos disponibles"><i>✦</i><span id="creditN">0</span> créditos</div>
+      <a class="btn btn-line" href="index.html" style="padding:11px 16px">Salir</a>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <aside class="side">
+    <div class="panel">
+      <div class="plan-chip"><b id="planName">Sin plan</b><span id="planBrand">—</span></div>
+      <ol class="stepper" id="stepper"></ol>
+    </div>
+    <div class="panel hist">
+      <h4>Historial de aprendizajes</h4>
+      <ul id="histList"></ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- 1 · PLAN -->
+    <section class="view" data-step="1">
+      <div class="vh"><span class="k">Paso 1 · Cuenta</span><h1>Elige cómo quieres aprender.</h1><p>Cada plan entrega una cantidad de créditos. Un crédito activa una publicación o una nueva prueba A/B.</p></div>
+      <div class="choices c3" id="plans"></div>
+      <p class="note" style="margin-top:16px">Esta demo no publica anuncios ni solicita pagos. Los resultados se generan con un modelo simulado a partir de tus decisiones.</p>
+      <div class="actions"><span></span><button class="btn btn-violet" data-next="2">Elegir marca →</button></div>
+      <div class="err" data-err="1">Elige un plan para continuar.</div>
+    </section>
+
+    <!-- 2 · MARCA -->
+    <section class="view" data-step="2">
+      <div class="vh"><span class="k">Paso 2 · Marca</span><h1>¿Con qué marca quieres practicar?</h1><p>En Gratis trabajas con marcas educativas de TESTEA. En Pro y Empresa puedes conectar tu propia marca.</p></div>
+      <div class="choices c4" id="brands"></div>
+      <div class="box" id="ownBrand" style="display:none;margin-top:16px">
+        <div class="fg two">
+          <label class="f">Nombre de la marca<input id="obName" placeholder="Ej: Huerto Vivo"></label>
+          <label class="f">Producto o servicio<input id="obProduct" placeholder="Ej: Cajas de verduras orgánicas"></label>
+          <label class="f">Público principal<input id="obAudience" placeholder="Ej: Familias jóvenes de Santiago"></label>
+          <label class="f">Propuesta de valor<input id="obValue" placeholder="Ej: Verduras frescas a domicilio cada semana"></label>
+        </div>
+      </div>
+      <div class="actions"><button class="btn btn-line" data-prev="1">← Volver</button><button class="btn btn-violet" data-next="3">Ver el brief →</button></div>
+      <div class="err" data-err="2">Elige una marca (o completa los datos de tu marca propia).</div>
+    </section>
+
+    <!-- 3 · BRIEF + KPI -->
+    <section class="view" data-step="3">
+      <div class="vh"><span class="k">Paso 3 · Brief y KPI</span><h1>Analiza el caso y elige qué medir.</h1><p>Elige <b>3 KPI</b> que realmente permitan evaluar el objetivo. TESTEA te dirá cuáles aportan información y cuáles son métricas de vanidad.</p></div>
+      <div class="box"><dl class="brief" id="brief"></dl></div>
+      <div class="box">
+        <h3 style="font-size:20px;margin-bottom:6px">¿Qué KPI medirán el objetivo? <span class="counter" id="kpiCount">0/3</span></h3>
+        <p style="font-size:15px;margin-bottom:14px">Toca para seleccionar. Luego presiona “Revisar mis KPI”.</p>
+        <div class="kpis" id="kpis"></div>
+        <div class="actions" style="margin-top:16px"><span id="kpiScore" style="font-weight:800;color:var(--ink)"></span><button class="btn btn-yellow" id="checkKpi">Revisar mis KPI</button></div>
+      </div>
+      <div class="actions"><button class="btn btn-line" data-prev="2">← Volver</button><button class="btn btn-violet" data-next="4">Crear el anuncio →</button></div>
+      <div class="err" data-err="3">Selecciona 3 KPI y revísalos antes de continuar.</div>
+    </section>
+
+    <!-- 4 · ANUNCIO A -->
+    <section class="view" data-step="4">
+      <div class="vh"><span class="k">Paso 4 · Anuncio</span><h1>Crea tu primer anuncio.</h1><p>Esta será la versión de control. Piensa en el objetivo y en la audiencia del brief.</p></div>
+      <div class="adgrid">
+        <div class="box">
+          <div class="fg">
+            <label class="f">Texto principal <small>Lo primero que leerá tu audiencia.</small><textarea id="aCopy" maxlength="180"></textarea></label>
+            <label class="f">Llamado a la acción<div class="seg" id="aCta"></div></label>
+            <label class="f">Visual<div class="seg" id="aVisual"></div></label>
+            <label class="f">Audiencia<div class="seg" id="aAud"></div></label>
+          </div>
+        </div>
+        <div class="post" id="aPreview"></div>
+      </div>
+      <div class="approval" id="approvalA"><span class="sp"></span><span>Enviado a aprobación del líder de equipo…</span></div>
+      <div class="actions"><button class="btn btn-line" data-prev="3">← Volver</button><button class="btn btn-violet" id="publishA">Publicar en Meta · 1 crédito</button></div>
+      <div class="err" data-err="4">Escribe un texto principal de al menos 20 caracteres.</div>
+    </section>
+
+    <!-- 5 · PUBLICACIÓN + RESULTADOS -->
+    <section class="view" data-step="5">
+      <div class="box launch" id="launch">
+        <div class="plane">➤</div>
+        <div class="bar"><i id="launchBar"></i></div>
+        <p id="launchMsg">Publicando en Instagram y Facebook…</p>
+        <small>Alcance controlado · cuentas habilitadas por TESTEA</small>
+      </div>
+      <div id="resA" style="display:none">
+        <div class="vh"><span class="k">Paso 5 · Resultados</span><h1>Tus primeros resultados.</h1><p>Los KPI que elegiste aparecen destacados. Observa qué información es útil para el objetivo y cuál es solo vanidad.</p></div>
+        <div class="box"><div class="mets" id="metsA"></div>
+          <div class="funnel" id="funnelA"></div>
+          <div class="read"><span class="ic">💡</span><div><h4>Lectura guiada</h4><div id="readA"></div></div></div>
+        </div>
+        <div class="actions"><span></span><button class="btn btn-violet" data-next="6">Formular una hipótesis →</button></div>
+      </div>
+    </section>
+
+    <!-- 6 · HIPÓTESIS -->
+    <section class="view" data-step="6">
+      <div class="vh"><span class="k">Paso 6 · Hipótesis</span><h1>Antes de cambiar algo, decide qué quieres comprobar.</h1><p>Un buen test A/B cambia <b>una sola variable</b>. Así, si el resultado mejora, sabrás por qué.</p></div>
+      <div class="box">
+        <label class="f">¿Qué variable vas a modificar?<div class="seg" id="variable"></div></label>
+        <div class="hyp" id="hypTpl"></div>
+        <label class="f" style="margin-top:16px">Tu hipótesis, con tus palabras<small>Ejemplo: “Si cambio el mensaje y destaco el beneficio laboral, aumentará la conversión”.</small><textarea id="hypText"></textarea></label>
+        <p id="sugg" class="note" style="margin-top:14px"></p>
+      </div>
+      <div class="actions"><button class="btn btn-line" data-prev="5">← Ver resultados</button><button class="btn btn-violet" data-next="7">Crear la versión B →</button></div>
+      <div class="err" data-err="6">Elige una variable y escribe tu hipótesis empezando por “Si…” e indicando qué esperas que aumente o disminuya.</div>
+    </section>
+
+    <!-- 7 · VERSIÓN B -->
+    <section class="view" data-step="7">
+      <div class="vh"><span class="k">Paso 7 · Test A/B</span><h1>Construye la versión B.</h1><p>Solo puedes editar la variable de tu hipótesis: <b id="varLabel"></b>. Todo lo demás queda igual que en la versión A.</p></div>
+      <div class="box">
+        <div class="fg" id="bForm">
+          <label class="f" data-var="mensaje">Texto principal<span class="lk">🔒 bloqueado</span><textarea id="bCopy" maxlength="180"></textarea></label>
+          <label class="f" data-var="cta">Llamado a la acción<span class="lk">🔒 bloqueado</span><div class="seg" id="bCta"></div></label>
+          <label class="f" data-var="visual">Visual<span class="lk">🔒 bloqueado</span><div class="seg" id="bVisual"></div></label>
+          <label class="f" data-var="audiencia">Audiencia<span class="lk">🔒 bloqueado</span><div class="seg" id="bAud"></div></label>
+        </div>
+      </div>
+      <div class="ab"><div class="a"><h3><i>A</i>Control</h3><div class="post" id="pvA"></div></div><div class="b"><h3><i>B</i>Prueba</h3><div class="post" id="pvB"></div></div></div>
+      <div class="approval" id="approvalB"><span class="sp"></span><span>Enviado a aprobación del líder de equipo…</span></div>
+      <div class="actions"><button class="btn btn-line" data-prev="6">← Volver</button><button class="btn btn-violet" id="runAB">Lanzar test A/B · 1 crédito</button></div>
+      <div class="err" data-err="7">La versión B debe ser distinta de la A en la variable elegida.</div>
+    </section>
+
+    <!-- 8 · COMPARACIÓN -->
+    <section class="view" data-step="8">
+      <div class="box launch" id="launchB">
+        <div class="plane">➤</div>
+        <div class="bar"><i id="launchBarB"></i></div>
+        <p id="launchMsgB">Repartiendo el presupuesto entre A y B…</p>
+        <small>Mismo presupuesto, misma duración, una sola variable distinta</small>
+      </div>
+      <div id="resB" style="display:none">
+        <div class="vh"><span class="k">Paso 8 · Comparación</span><h1>¿Tu hipótesis se cumplió?</h1><p>TESTEA compara ambas versiones en el KPI principal y explica qué significa la diferencia.</p></div>
+        <div class="box">
+          <div class="cmp" id="cmp"></div>
+          <div class="verdict" id="verdict"></div>
+        </div>
+        <div class="box trivia" id="trivia"></div>
+        <div class="actions"><button class="btn btn-line" data-prev="7">← Ajustar la versión B</button><button class="btn btn-violet" data-next="9">Convertir en aprendizaje →</button></div>
+      </div>
+    </section>
+
+    <!-- 9 · APRENDIZAJE -->
+    <section class="view" data-step="9">
+      <div class="vh"><span class="k">Paso 9 · Aprendizaje</span><h1>El resultado se transforma en una nueva decisión.</h1><p>Cada prueba queda registrada como evidencia: qué probaste, qué ocurrió, cómo lo interpretaste y qué harás después.</p></div>
+      <div class="box"><dl class="report" id="report"></dl></div>
+      <div class="box">
+        <label class="f">¿Qué probarías a continuación?<div class="seg" id="nextVar"></div></label>
+        <div class="done-msg" id="doneMsg">✓ Aprendizaje guardado en tu historial. La próxima campaña parte desde esta decisión.</div>
+      </div>
+      <div class="actions"><button class="btn btn-line" data-prev="8">← Ver comparación</button><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-yellow" id="save">Guardar aprendizaje</button><button class="btn btn-violet" id="again">Nueva campaña →</button></div></div>
+    </section>
+  </main>
+</div>
+
+<script src="js/demo.js"></script>
+</body>
+</html>
