@@ -20,8 +20,9 @@
 .hero .sub mark{background:var(--yellow);color:var(--ink);padding:6px 18px;border-radius:999px}
 .hero p.lead{font-size:clamp(17px,1.4vw,20px);max-width:560px;margin-top:26px}
 .hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
-.hero .hand{position:absolute;right:max(16px,calc((100vw - 1240px)/2 + 16px));top:22px;transform:rotate(-8deg);font-size:clamp(24px,2.4vw,34px);text-align:center}
-.hero .hand::after{content:"";display:block;height:6px;margin:4px auto 0;width:70%;background:var(--yellow);border-radius:6px;transform:rotate(-3deg)}
+.photo .top-note{position:absolute;z-index:3;left:-30%;top:-2%;transform:rotate(-8deg);font-size:clamp(24px,2.3vw,32px);line-height:1.05;text-align:center}
+.photo .top-note::after{content:"";display:block;height:6px;margin:6px auto 0;width:75%;background:var(--yellow);border-radius:6px;transform:rotate(-3deg)}
+.photo .note,.photo .badge{z-index:3}
 .photo{position:relative;justify-self:center;width:min(100%,460px);aspect-ratio:1/1.06}
 .photo .blob{position:absolute;inset:6% -4% 0 8%;background:var(--yellow);border-radius:58% 42% 48% 52% / 46% 54% 46% 54%;animation:morph 12s ease-in-out infinite}
 @keyframes morph{50%{border-radius:42% 58% 55% 45% / 55% 42% 58% 45%}}
@@ -166,7 +167,8 @@
 }
 @media(max-width:900px){
   .hero .g,.story,.aud,.final{grid-template-columns:1fr}
-  .hero .hand{display:none}
+  .photo{margin-top:60px}
+  .photo .top-note{left:auto;right:0;top:-64px;transform:rotate(-5deg)}
   .flow{grid-template-columns:1fr}
   .flow .arrow{transform:rotate(90deg);justify-self:center}
   .story .sticky{position:static}
@@ -211,7 +213,6 @@
 </nav>
 
 <section class="hero">
-  <span class="hand hw">Hoy pruebas.<br>Mañana conviertes.</span>
   <div class="wrap g">
     <div>
       <span class="eyebrow rv">Marketing en modo real</span>
@@ -223,6 +224,7 @@
     </div>
     <div class="photo rv">
       <div class="blob"></div>
+      <span class="top-note hw">Hoy pruebas.<br>Mañana conviertes.</span>
       <img src="img/camila.webp" alt="Estudiante de marketing sonriendo frente a su notebook">
       <span class="note hw">Ideas de hoy, resultados de mañana.</span>
       <div class="badge"><span style="font-size:26px">📈</span><span>CTR 4,7%<small>Variante B ganadora</small></span></div>
